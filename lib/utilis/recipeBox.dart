@@ -1,72 +1,33 @@
-import 'package:flutter/material.dart';
+
+
 import 'package:flutter_application_1/utilis/recipe.dart';
-import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
 
-class RecipeDataBase{
-  RecipeDataBase._();
+class RecipeBox{
+  static final RecipeBox instance = RecipeBox();
+  static Box? box;
 
-  static final RecipeDataBase instance = RecipeDataBase._();
-  static Database? _database; // Ajout du ? pour rendre nullable
+  static Future<void> init() async{
+    final dir  = await getApplicationDocumentsDirectory();
+    Hive.init(dir.path);
+    Hive.registerAdapter(RecipeAdapter());
+    box = await Hive.openBox("recipeBox");
 
-  Future<Database> get database async {
-    if(_database != null) return _database!; // avec le "!" à a fin On "promet" au compilateur que ce n'est pas null
-    _database = await initBD();
-    return _database!; // On "promet"  qu'il n'est pas null car on vient de l'initialiser
-  }
-
-
-  initBD() async{
-    WidgetsFlutterBinding.ensureInitialized();
-    return await openDatabase(
-      join( await getDatabasesPath(), 'recipe_database.db'),
-      onCreate: (db, version){
-        return db.execute(
-          "CREATE TABLE recipe(title TEXT PRIMARY KEY, user TEXT, imageUrl TEXT, description TEXT, isFavorited INTEGER, favoriteCount INTEGER)"
-        );
-      },
-      version: 1,
-    );
-  }
-
-  void insertRecipe(Recipe recipe) async {
-     final Database db = await database;
-     await db.insert(
-     'recipe',
-     recipe.toMap(),
-     conflictAlgorithm: ConflictAlgorithm.replace,
-     );
-  }
-
-  void updateRecipe(Recipe recipe) async {
-    final Database db  =  await database;
-    await db.update("recipe",recipe.toMap(),
-    where: 'title = ?',whereArgs: [recipe.title]);
-  }
-
-  void deleteRecipe(String title) async {
-    final Database db  =  await database;
-    await db.delete("recipe",where: 'title = ?',whereArgs: [title]);
-  }
-
-  Future <List <Recipe>> recipes() async{
-    final Database db = await database;
-    final List<Map <String, dynamic>> maps = await db.query('recipe');
-    List<Recipe> recipes = List.generate(maps.length, (i){
-     return Recipe.fromMap(maps[i]);
-    });
-
-    if(recipes.isEmpty){
-      for ( Recipe recipe in defaultRecipes){
-        insertRecipe(recipe);
+    // Vérifier que box n'est pas null avant d'accéder à values
+    if (box != null) {
+      var values = box!.values.toList();
+      if (values.isEmpty) {
+        for (var recipe in recipes) {
+          await box!.put(recipe.key(), recipe);
+        }
       }
-      recipes = defaultRecipes;
+    } else {
+      throw Exception("Failed to open Hive box");
     }
-
-    return recipes;
   }
 
-  final List<Recipe> defaultRecipes = [
+  static final List<Recipe> recipes = [
     Recipe(
         "Pizza facile",
         "Toi et Moi",
@@ -140,6 +101,4 @@ class RecipeDataBase{
         35
     )
   ];
-
-
 }

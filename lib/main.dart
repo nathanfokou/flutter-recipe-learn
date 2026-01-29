@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/recipeListScreen.dart';
 import 'package:flutter_application_1/recipeScreen.dart';
 import 'package:flutter_application_1/utilis/recipe.dart';
+import 'package:flutter_application_1/utilis/recipeBox.dart';
 
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await RecipeBox.init();
   runApp( MyApp());
 }
 
