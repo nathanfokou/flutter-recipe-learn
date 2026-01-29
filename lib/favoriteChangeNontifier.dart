@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/utilis/recipe.dart';
-import 'package:flutter_application_1/utilis/recipeDataBase.dart';
+import 'package:flutter_application_1/utilis/recipeBox.dart';
 
 class FavoriteChangeNontifier  with ChangeNotifier {
  /*
@@ -34,7 +34,8 @@ class FavoriteChangeNontifier  with ChangeNotifier {
   set isFavorited( bool isFavorited){
 
     recipe.isFavorited = isFavorited;
-    RecipeDataBase.instance.updateRecipe(recipe);
+    //RecipeDataBase.instance.updateRecipe(recipe);
+    RecipeBox.box?.put(recipe.key(), recipe);
 
     notifyListeners();
 

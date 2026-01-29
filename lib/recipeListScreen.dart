@@ -2,7 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/recipeScreen.dart';
 import 'package:flutter_application_1/utilis/recipe.dart';
-import 'package:flutter_application_1/utilis/recipeDataBase.dart';
+import 'package:flutter_application_1/utilis/recipeBox.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 
 class RecipeListScreen extends StatefulWidget{
@@ -97,35 +99,32 @@ class RecipeListScreenState extends State<RecipeListScreen> {
         title: Text("Mes recettes",style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
         backgroundColor:  Colors.red[500],
       ),
-      body: FutureBuilder<List<Recipe>>(
-        future: RecipeDataBase.instance.recipes() ,
-        builder: (BuildContext context, AsyncSnapshot<List<Recipe>> snapshot) {
-          if(snapshot.hasData){
-            List<Recipe> recipes = snapshot.data!;
+      body: ValueListenableBuilder(
+          valueListenable: RecipeBox.box!.listenable() ,
+          builder: (context, Box items, _) {
+
+            List<String> keys = items.keys.cast<String>().toList();
             return ListView.builder(
-                itemCount: recipes.length ,
+                itemCount: keys.length ,
                 itemBuilder: (context,index){
-                  final recipe =  recipes[index];
+                  final recipe =  items.get(keys[index]);
                   return Dismissible(
                       key: Key(recipe.title),
                       onDismissed: (direction){
                         setState(() {
-                          RecipeDataBase.instance.deleteRecipe(recipe.title);
+                          RecipeBox.box?.delete(recipe.key());
                           //recipes.removeAt(index);
                         });
                         ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text("${recipe.title} supprimé")) );
                       },
                       background: Container( color: Colors.red) ,
-                      child: RecipeItemWidget(recipe: recipes[index])
+                      child: RecipeItemWidget(recipe: items.get(keys[index]))
                   );
 
                 }
             );
-          }
-          else{
-            return Center(child: Text("No data"));
-          }
+
         }
       ),
 
