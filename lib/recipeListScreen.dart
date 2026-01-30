@@ -127,6 +127,12 @@ class RecipeListScreenState extends State<RecipeListScreen> {
 
         }
       ),
+      floatingActionButton: FloatingActionButton(
+          onPressed: (){
+            Navigator.pushNamed(context, '/newRecipe');
+          },
+        child: Icon(Icons.add) ,
+      ),
 
 
       /*body: ListView(
@@ -228,7 +234,7 @@ class RecipeItemWidget extends StatelessWidget{
             )
           ],
         ),
-      ),
+      ), 
     );
   }
 }

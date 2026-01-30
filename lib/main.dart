@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/recipeFormScreen.dart';
 import 'package:flutter_application_1/recipeListScreen.dart';
 import 'package:flutter_application_1/recipeScreen.dart';
 import 'package:flutter_application_1/utilis/recipe.dart';
@@ -56,6 +57,8 @@ class RouteGnerator {
               );
             }
         );
+      case'/newRecipe':
+        return MaterialPageRoute(builder: (context)=> RecipeFormScreen());
       default :
         return MaterialPageRoute(
             builder: (context) => Scaffold(
